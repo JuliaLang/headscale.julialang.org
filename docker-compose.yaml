@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+
+  nginx:
+    image: jonasal/nginx-certbot:5.0.0
+    container_name: nginx
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    volumes:
+      - ./nginx/00-common.conf:/etc/nginx/conf.d/00-common.conf:ro
+      - ./nginx/01-catch-all.conf:/etc/nginx/conf.d/01-catch-all.conf:ro
+      - ./nginx/ssl-common.fnoc:/etc/nginx/conf.d/ssl-common.fnoc:ro
+      - ./headscale/nginx.conf:/etc/nginx/templates/headscale.conf.template:ro
+      - letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
+    environment:
+      - HEADSCALE_FQDN=${HEADSCALE_FQDN}
+      - CERTBOT_EMAIL=${CERTBOT_EMAIL}
+      - DHPARAM_SIZE=4096
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["/scripts/start_nginx_certbot.sh"]
+
+  dex:
+    image: ghcr.io/dexidp/dex
+    container_name: dex
+    # ports:
+    #   - "5558:5558/tcp"
+    command: ["dex", "serve", "/etc/dex/config.yaml"]
+    volumes:
+      - ./dex/config.yaml:/etc/dex/config.yaml:ro
+    restart: unless-stopped
+    environment:
+      # Resolved from .env but instead of env_file: we filter out the ones needed by dex
+      - DEX_OIDC_ISSUER_URI=${DEX_OIDC_ISSUER_URI}
+      - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID}
+      - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
+      - GITHUB_OAUTH_CALLBACK_URI=${GITHUB_OAUTH_CALLBACK_URI}
+      - GITHUB_OAUTH_AUTHORIZED_ORG=${GITHUB_OAUTH_AUTHORIZED_ORG}
+      - HEADSCALE_OIDC_CLIENT_ID=${HEADSCALE_OIDC_CLIENT_ID}
+      - HEADSCALE_OIDC_CLIENT_SECRET=${HEADSCALE_OIDC_CLIENT_SECRET}
+      - HEADSCALE_OIDC_CALLBACK_URI=${HEADSCALE_OIDC_CALLBACK_URI}
+
+volumes:
+  letsencrypt:

@@ -1,0 +1,17 @@
+# Listen to port 443 on both IPv4 and IPv6.
+listen      443 ssl;
+listen [::]:443 ssl;
+http2 on;
+
+# Various SSL settings
+ssl_session_timeout    5m;
+ssl_session_cache      shared:SSL:50m;
+ssl_session_tickets    off;
+ssl_stapling           on;
+ssl_stapling_verify    on;
+
+# Logging in the vhost format
+access_log /var/log/nginx/access.log vhost;
+
+# HTTP Strict Transport Security (HSTS)
+add_header Strict-Transport-Security "max-age=31536000" always;

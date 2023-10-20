@@ -1,0 +1,49 @@
+issuer: "{{ .Env.DEX_OIDC_ISSUER_URI }}"
+
+storage:
+  type: sqlite3
+  config:
+    file: "/var/dex/dex.db"
+
+web:
+  http: "0.0.0.0:5556"
+
+telemetry:
+  http: "0.0.0.0:5558"
+
+expiry:
+  deviceRequests: "5m"
+  signingKeys: "6h"
+  idTokens: "24h"
+  authRequests: "24h"
+
+logger:
+  level: "info"
+  format: "text"
+
+oauth2:
+  responseTypes:
+    - code
+  skipApprovalScreen: false
+  alwaysShowLoginScreen: false
+
+enablePasswordDB: false
+
+connectors:
+  - type: github
+    id: github
+    name: GitHub
+    config:
+      clientID: "{{ .Env.GITHUB_OAUTH_CLIENT_ID }}"
+      clientSecret: "{{ .Env.GITHUB_OAUTH_CLIENT_SECRET }}"
+      redirectURI: "{{ .Env.GITHUB_OAUTH_CALLBACK_URI }}"
+      orgs:
+        - name: "{{ .Env.GITHUB_OAUTH_AUTHORIZED_ORG }}"
+      useLoginAsID: false
+
+staticClients:
+  - id: "{{ .Env.HEADSCALE_OIDC_CLIENT_ID }}"
+    secret: "{{ .Env.HEADSCALE_OIDC_CLIENT_SECRET }}"
+    redirectURIs:
+      - "{{ .Env.HEADSCALE_OIDC_CALLBACK_URI }}"
+    name: "{{ .Env.HEADSCALE_OIDC_CLIENT_ID }}"
