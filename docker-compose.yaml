@@ -13,9 +13,11 @@ services:
       - ./nginx/01-catch-all.conf:/etc/nginx/conf.d/01-catch-all.conf:ro
       - ./nginx/ssl-common.fnoc:/etc/nginx/conf.d/ssl-common.fnoc:ro
       - ./headscale/nginx.conf:/etc/nginx/templates/headscale.conf.template:ro
+      - ./dex/nginx.conf:/etc/nginx/templates/dex.conf.template:ro
       - letsencrypt:/etc/letsencrypt
     restart: unless-stopped
     environment:
+      - DEX_FQDN=${DEX_FQDN}
       - HEADSCALE_FQDN=${HEADSCALE_FQDN}
       - CERTBOT_EMAIL=${CERTBOT_EMAIL}
       - DHPARAM_SIZE=4096
