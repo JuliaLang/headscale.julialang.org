@@ -289,7 +289,7 @@ oidc:
 #   # Customize the scopes used in the OIDC flow, defaults to "openid", "profile" and "email" and add custom query
 #   # parameters to the Authorize Endpoint request. Scopes default to "openid", "profile" and "email".
 #
-#   scope: ["openid", "profile", "email", "custom"]
+  scope: ["openid", "profile", "email", "groups"]
 #   extra_params:
 #     domain_hint: example.com
 #
@@ -299,8 +299,7 @@ oidc:
 #   allowed_domains:
 #     - example.com
 #   # Note: Groups from keycloak have a leading '/'
-#   allowed_groups:
-#     - /headscale
+  allowed_groups: ${HEADSCALE_OIDC_ALLOWED_GROUPS}
 #   allowed_users:
 #     - alice@example.com
 #
