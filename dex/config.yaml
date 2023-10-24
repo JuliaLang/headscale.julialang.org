@@ -39,6 +39,7 @@ connectors:
       redirectURI: "{{ .Env.GITHUB_OAUTH_CALLBACK_URI }}"
       orgs:
         - name: "{{ .Env.GITHUB_OAUTH_AUTHORIZED_ORG }}"
+          teams: {{ .Env.GITHUB_OAUTH_AUTHORIZED_TEAMS }}
       useLoginAsID: false
 
 staticClients:

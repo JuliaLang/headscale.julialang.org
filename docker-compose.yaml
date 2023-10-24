@@ -24,13 +24,14 @@ services:
     command: ["/scripts/start_nginx_certbot.sh"]
 
   dex:
-    image: ghcr.io/dexidp/dex
+    image: ghcr.io/dexidp/dex:v2.37.0
     container_name: dex
     # ports:
     #   - "5558:5558/tcp"
     command: ["dex", "serve", "/etc/dex/config.yaml"]
     volumes:
       - ./dex/config.yaml:/etc/dex/config.yaml:ro
+      - dex:/var/dex # for /var/dex/dex.db sqlite3 database
     restart: unless-stopped
     environment:
       # Resolved from .env but instead of env_file: we filter out the ones needed by dex
@@ -39,9 +40,11 @@ services:
       - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
       - GITHUB_OAUTH_CALLBACK_URI=${GITHUB_OAUTH_CALLBACK_URI}
       - GITHUB_OAUTH_AUTHORIZED_ORG=${GITHUB_OAUTH_AUTHORIZED_ORG}
+      - GITHUB_OAUTH_AUTHORIZED_TEAMS=${GITHUB_OAUTH_AUTHORIZED_TEAMS}
       - HEADSCALE_OIDC_CLIENT_ID=${HEADSCALE_OIDC_CLIENT_ID}
       - HEADSCALE_OIDC_CLIENT_SECRET=${HEADSCALE_OIDC_CLIENT_SECRET}
       - HEADSCALE_OIDC_CALLBACK_URI=${HEADSCALE_OIDC_CALLBACK_URI}
 
 volumes:
   letsencrypt:
+  dex:
