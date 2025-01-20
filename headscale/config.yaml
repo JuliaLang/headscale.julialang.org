@@ -232,7 +232,9 @@ dns_config:
   #     - 8.8.8.8
 
   # Search domains to inject.
-  domains: []
+  domains:
+    - "pkgservers.headscale.julialang.org"
+    - "servers.headscale.julialang.org"
 
   # Extra DNS records
   # so far only A-records are supported (on the tailscale side)

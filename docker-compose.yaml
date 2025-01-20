@@ -5,9 +5,11 @@ services:
   nginx:
     image: jonasal/nginx-certbot:5.0.0
     container_name: nginx
-    ports:
-      - "80:80/tcp"
-      - "443:443/tcp"
+    # ports:
+    #   - "80:80/tcp"
+    #   - "443:443/tcp"
+    #   - "8228:8228/tcp"
+    network_mode: "host" # IPv6 please
     volumes:
       - ./nginx/00-common.conf:/etc/nginx/conf.d/00-common.conf:ro
       - ./nginx/01-catch-all.conf:/etc/nginx/conf.d/01-catch-all.conf:ro
@@ -30,6 +32,7 @@ services:
     container_name: dex
     # ports:
     #   - "5558:5558/tcp"
+    network_mode: "host"
     command: ["dex", "serve", "/etc/dex/config.yaml"]
     volumes:
       - ./dex/config.yaml:/etc/dex/config.yaml:ro
