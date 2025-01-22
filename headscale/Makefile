@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 MAKEFILE_DIRECTORY:=$(dir $(abspath $(firstword $(MAKEFILE_LIST))))
-HEADSCALE_VERSION:=0.22.3
+HEADSCALE_VERSION:=0.23.0
 HEADSCALE_URL:=https://github.com/juanfont/headscale/releases/download/v$(HEADSCALE_VERSION)/headscale_$(HEADSCALE_VERSION)_linux_amd64.deb
 HEADSCALE_DEB:=build/headscale-$(HEADSCALE_VERSION).deb
 
@@ -22,7 +22,9 @@ build/config.yaml: config.yaml ../.env | build
 	export HEADSCALE_OIDC_CLIENT_SECRET="$${HEADSCALE_OIDC_CLIENT_SECRET}" && \
 	export HEADSCALE_OIDC_ALLOWED_GROUPS="$${HEADSCALE_OIDC_ALLOWED_GROUPS}" && \
 	export DEX_OIDC_ISSUER_URI="$${DEX_OIDC_ISSUER_URI}" && \
-	envsubst '\$${HEADSCALE_FQDN}\$${HEADSCALE_OIDC_CLIENT_ID}\$${HEADSCALE_OIDC_CLIENT_SECRET}\$${HEADSCALE_OIDC_ALLOWED_GROUPS}\$${DEX_OIDC_ISSUER_URI}' < $< > $@
+	export TAILNET_BASE_DOMAIN="$${TAILNET_BASE_DOMAIN}" && \
+	export EXTRA_RECORDS="$$(cat extra_records.yaml)" && \
+	envsubst '\$${HEADSCALE_FQDN}\$${HEADSCALE_OIDC_CLIENT_ID}\$${HEADSCALE_OIDC_CLIENT_SECRET}\$${HEADSCALE_OIDC_ALLOWED_GROUPS}\$${DEX_OIDC_ISSUER_URI}\$${TAILNET_BASE_DOMAIN}\$${EXTRA_RECORDS}' < $< > $@
 
 # Symlink the config
 /etc/headscale/config.yaml: build/config.yaml
