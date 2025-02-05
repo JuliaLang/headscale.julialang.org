@@ -1,4 +1,4 @@
-# Based on example config for headscale version 0.23.0
+# Based on example config for headscale version 0.24.0
 
 ---
 # headscale will look for a configuration file named `config.yaml` (or `config.json`) in the following order:
@@ -60,8 +60,8 @@ noise:
 # IPv4: https://github.com/tailscale/tailscale/blob/22ebb25e833264f58d7c3f534a8b166894a89536/net/tsaddr/tsaddr.go#L33
 # Any other range is NOT supported, and it will cause unexpected issues.
 prefixes:
-  v6: fd7a:115c:a1e0::/48
   v4: 100.64.0.0/10
+  v6: fd7a:115c:a1e0::/48
 
   # Strategy used for allocation of IPs to nodes, available options:
   # - sequential (default): assigns the next free IP from the previous given IP.
@@ -170,6 +170,11 @@ database:
     # https://www.sqlite.org/wal.html
     write_ahead_log: true
 
+    # Maximum number of WAL file frames before the WAL file is automatically checkpointed.
+    # https://www.sqlite.org/c3ref/wal_autocheckpoint.html
+    # Set to 0 to disable automatic checkpointing.
+    wal_autocheckpoint: 1000
+
   # # Postgres config
   # Please note that using Postgres is highly discouraged as it is only supported for legacy reasons.
   # See database.type for more information.
@@ -262,7 +267,6 @@ policy:
 # all the fields under `dns` should be set to empty values.
 dns:
   # Whether to use [MagicDNS](https://tailscale.com/kb/1081/magicdns/).
-  # Only works if there is at least a nameserver defined.
   magic_dns: true
 
   # Defines the base domain to create the hostnames for MagicDNS.
@@ -301,17 +305,11 @@ dns:
   # Extra DNS records
   # so far only A-records are supported (on the tailscale side)
   # See https://github.com/juanfont/headscale/blob/main/docs/dns-records.md#Limitations
-  extra_records:
-${EXTRA_RECORDS}
-
-  # DEPRECATED
-  # Use the username as part of the DNS name for nodes, with this option enabled:
-  # node1.username.example.com
-  # while when this is disabled:
-  # node1.example.com
-  # This is a legacy option as Headscale has have this wrongly implemented
-  # while in upstream Tailscale, the username is not included.
-  use_username_in_magic_dns: false
+  # extra_records: []
+  #
+  # Alternatively, extra DNS records can be loaded from a JSON file.
+  # Headscale processes this file on each change.
+  extra_records_path: /etc/headscale/extra-records.json
 
 # Unix socket used for the CLI to connect without authentication
 # Note: for production you will want to set this to something like:
