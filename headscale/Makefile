@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 MAKEFILE_DIRECTORY:=$(dir $(abspath $(firstword $(MAKEFILE_LIST))))
-HEADSCALE_VERSION:=0.25.1
+HEADSCALE_VERSION:=0.26.1
 HEADSCALE_URL:=https://github.com/juanfont/headscale/releases/download/v$(HEADSCALE_VERSION)/headscale_$(HEADSCALE_VERSION)_linux_amd64.deb
 HEADSCALE_DEB:=build/headscale-$(HEADSCALE_VERSION).deb
 
