@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 MAKEFILE_DIRECTORY:=$(dir $(abspath $(firstword $(MAKEFILE_LIST))))
-HEADSCALE_VERSION:=0.24.2
+HEADSCALE_VERSION:=0.25.1
 HEADSCALE_URL:=https://github.com/juanfont/headscale/releases/download/v$(HEADSCALE_VERSION)/headscale_$(HEADSCALE_VERSION)_linux_amd64.deb
 HEADSCALE_DEB:=build/headscale-$(HEADSCALE_VERSION).deb
 
@@ -33,6 +33,12 @@ build/config.yaml: config.yaml ../.env | build
 # Temporarily add extra records
 /etc/headscale/extra-records.json: extra-records.json /etc/headscale/config.yaml
 	sudo cp -f $< $@
+
+# Note: `systemctl reload headscale` only reloads ACLs, not the full config
+reload: /etc/headscale/config.yaml
+	sudo headscale configtest && \
+		sudo systemctl stop headscale && \
+		sudo systemctl start headscale
 
 # Install and start the headscale daemon
 install: $(HEADSCALE_DEB) | /etc/headscale/config.yaml /etc/headscale/extra-records.json

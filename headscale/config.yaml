@@ -1,4 +1,4 @@
-# Based on example config for headscale version 0.24.0
+# Based on example config for headscale version 0.25.1
 
 ---
 # headscale will look for a configuration file named `config.yaml` (or `config.json`) in the following order:
@@ -18,7 +18,7 @@ server_url: "https://${HEADSCALE_FQDN}"
 #
 # For production:
 # listen_addr: 0.0.0.0:8080
-listen_addr: 0.0.0.0:8443
+listen_addr: 127.0.0.1:8443
 
 # Address to listen to /metrics, you may want
 # to keep this endpoint private to your internal
@@ -216,7 +216,7 @@ tls_letsencrypt_cache_dir: /var/lib/headscale/cache
 
 # Type of ACME challenge to use, currently supported types:
 # HTTP-01 or TLS-ALPN-01
-# See [docs/tls.md](docs/tls.md) for more information
+# See: docs/ref/tls.md for more information
 tls_letsencrypt_challenge_type: HTTP-01
 # When HTTP-01 challenge is chosen, letsencrypt must set up a
 # verification endpoint, and it will be listening on:
@@ -303,9 +303,15 @@ dns:
   search_domains: []
 
   # Extra DNS records
-  # so far only A-records are supported (on the tailscale side)
-  # See https://github.com/juanfont/headscale/blob/main/docs/dns-records.md#Limitations
+  # so far only A and AAAA records are supported (on the tailscale side)
+  # See: docs/ref/dns.md
   # extra_records: []
+  #   - name: "grafana.myvpn.example.com"
+  #     type: "A"
+  #     value: "100.64.0.3"
+  #
+  #   # you can also put it in one line
+  #   - { name: "prometheus.myvpn.example.com", type: "A", value: "100.64.0.3" }
   #
   # Alternatively, extra DNS records can be loaded from a JSON file.
   # Headscale processes this file on each change.
@@ -355,16 +361,36 @@ oidc:
 #   allowed_domains:
 #     - example.com
 #   # Note: Groups from keycloak have a leading '/'
+#   allowed_groups:
+#     - /headscale
   allowed_groups: ${HEADSCALE_OIDC_ALLOWED_GROUPS}
 #   allowed_users:
 #     - alice@example.com
 #
-#   # If `strip_email_domain` is set to `true`, the domain part of the username email address will be removed.
-#   # This will transform `first-name.last-name@example.com` to the user `first-name.last-name`
-#   # If `strip_email_domain` is set to `false` the domain part will NOT be removed resulting to the following
-#   user: `first-name.last-name.example.com`
+#   # Optional: PKCE (Proof Key for Code Exchange) configuration
+#   # PKCE adds an additional layer of security to the OAuth 2.0 authorization code flow
+#   # by preventing authorization code interception attacks
+#   # See https://datatracker.ietf.org/doc/html/rfc7636
+#   pkce:
+#     # Enable or disable PKCE support (default: false)
+#     enabled: false
+#     # PKCE method to use:
+#     # - plain: Use plain code verifier
+#     # - S256: Use SHA256 hashed code verifier (default, recommended)
+#     method: S256
 #
-  strip_email_domain: false
+#   # Map legacy users from pre-0.24.0 versions of headscale to the new OIDC users
+#   # by taking the username from the legacy user and matching it with the username
+#   # provided by the OIDC. This is useful when migrating from legacy users to OIDC
+#   # to force them using the unique identifier from the OIDC and to give them a
+#   # proper display name and picture if available.
+#   # Note that this will only work if the username from the legacy user is the same
+#   # and there is a possibility for account takeover should a username have changed
+#   # with the provider.
+#   # When this feature is disabled, it will cause all new logins to be created as new users.
+#   # Note this option will be removed in the future and should be set to false
+#   # on all new installations, or when all users have logged in with OIDC once.
+#   map_legacy_users: false
 
 # Logtail configuration
 # Logtail is Tailscales logging and auditing infrastructure, it allows the control panel
