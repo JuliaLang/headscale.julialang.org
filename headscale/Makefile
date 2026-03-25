@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 MAKEFILE_DIRECTORY:=$(dir $(abspath $(firstword $(MAKEFILE_LIST))))
-HEADSCALE_VERSION:=0.26.1
+HEADSCALE_VERSION:=0.27.1
 HEADSCALE_URL:=https://github.com/juanfont/headscale/releases/download/v$(HEADSCALE_VERSION)/headscale_$(HEADSCALE_VERSION)_linux_amd64.deb
 HEADSCALE_DEB:=build/headscale-$(HEADSCALE_VERSION).deb
 
@@ -44,8 +44,8 @@ reload: /etc/headscale/config.yaml
 install: $(HEADSCALE_DEB) | /etc/headscale/config.yaml /etc/headscale/extra-records.json
 	sudo dpkg -i $<
 	sudo chown headscale:headscale /etc/headscale/config.yaml
-	sudo systemctl enable headscale
-	sudo systemctl start headscale
+	sudo headscale configtest && \
+		sudo systemctl enable --now headscale
 
 clean:
 	rm -rf build
