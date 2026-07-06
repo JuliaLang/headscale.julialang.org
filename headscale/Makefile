@@ -25,23 +25,29 @@ build/config.yaml: config.yaml ../.env | build
 	export TAILNET_BASE_DOMAIN="$${TAILNET_BASE_DOMAIN}" && \
 	envsubst '\$${HEADSCALE_FQDN}\$${HEADSCALE_OIDC_CLIENT_ID}\$${HEADSCALE_OIDC_CLIENT_SECRET}\$${HEADSCALE_OIDC_ALLOWED_GROUPS}\$${DEX_OIDC_ISSUER_URI}\$${TAILNET_BASE_DOMAIN}' < $< > $@
 
-# Symlink the config
-/etc/headscale/config.yaml: build/config.yaml
-	sudo mkdir -p /etc/headscale
+/etc/headscale:
+	sudo mkdir -p $@
+
+# Copy the config
+/etc/headscale/config.yaml: build/config.yaml | /etc/headscale
 	sudo cp -f ${MAKEFILE_DIRECTORY}build/config.yaml $@
 
+# Copy the ACLs
+/etc/headscale/acl.json: acl.json | /etc/headscale
+	sudo cp -f $< $@
+
 # Temporarily add extra records
-/etc/headscale/extra-records.json: extra-records.json /etc/headscale/config.yaml
+/etc/headscale/extra-records.json: extra-records.json
 	sudo cp -f $< $@
 
 # Note: `systemctl reload headscale` only reloads ACLs, not the full config
-reload: /etc/headscale/config.yaml
+reload: /etc/headscale/config.yaml /etc/headscale/extra-records.json /etc/headscale/acl.json
 	sudo headscale configtest && \
 		sudo systemctl stop headscale && \
 		sudo systemctl start headscale
 
 # Install and start the headscale daemon
-install: $(HEADSCALE_DEB) | /etc/headscale/config.yaml /etc/headscale/extra-records.json
+install: $(HEADSCALE_DEB) | /etc/headscale/config.yaml /etc/headscale/extra-records.json /etc/headscale/acl.json
 	sudo dpkg -i $<
 	sudo chown headscale:headscale /etc/headscale/config.yaml
 	sudo headscale configtest && \
