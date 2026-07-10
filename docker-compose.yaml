@@ -3,7 +3,7 @@ version: '3'
 services:
 
   nginx:
-    image: jonasal/nginx-certbot:5.0.0
+    image: jonasal/nginx-certbot:6.2.0
     container_name: nginx
     # ports:
     #   - "80:80/tcp"
@@ -11,24 +11,17 @@ services:
     #   - "8228:8228/tcp"
     network_mode: "host" # IPv6 please
     volumes:
-      - ./nginx/00-common.conf:/etc/nginx/conf.d/00-common.conf:ro
-      - ./nginx/01-catch-all.conf:/etc/nginx/conf.d/01-catch-all.conf:ro
-      - ./nginx/ssl-common.fnoc:/etc/nginx/conf.d/ssl-common.fnoc:ro
-      - ./headscale/nginx.conf:/etc/nginx/templates/headscale.conf.template:ro
-      - ./dex/nginx.conf:/etc/nginx/templates/dex.conf.template:ro
+      - ./nginx/00-nginx-http.conf:/etc/nginx/conf.d/00-nginx-http.conf:ro
+      - ./nginx/01-default-server.conf:/etc/nginx/conf.d/01-default-server.conf:ro
+      - ./nginx/dex.conf:/etc/nginx/templates/dex.conf.template:ro
+      - ./nginx/headscale.conf:/etc/nginx/templates/headscale.conf.template:ro
+      - ./nginx/ffdhe2048.pem:/etc/nginx/ffdhe2048.pem:ro
       - letsencrypt:/etc/letsencrypt
     restart: unless-stopped
-    environment:
-      - DEX_FQDN=${DEX_FQDN}
-      - HEADSCALE_FQDN=${HEADSCALE_FQDN}
-      - CERTBOT_EMAIL=${CERTBOT_EMAIL}
-      - DHPARAM_SIZE=4096
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    command: ["/scripts/start_nginx_certbot.sh"]
+    env_file: ./secrets/nginx.env
 
   dex:
-    image: ghcr.io/dexidp/dex:v2.37.0
+    image: ghcr.io/dexidp/dex:v2.45.1
     container_name: dex
     # ports:
     #   - "5558:5558/tcp"
@@ -38,17 +31,7 @@ services:
       - ./dex/config.yaml:/etc/dex/config.yaml:ro
       - dex:/var/dex # for /var/dex/dex.db sqlite3 database
     restart: unless-stopped
-    environment:
-      # Resolved from .env but instead of env_file: we filter out the ones needed by dex
-      - DEX_OIDC_ISSUER_URI=${DEX_OIDC_ISSUER_URI}
-      - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID}
-      - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
-      - GITHUB_OAUTH_CALLBACK_URI=${GITHUB_OAUTH_CALLBACK_URI}
-      - GITHUB_OAUTH_AUTHORIZED_ORG=${GITHUB_OAUTH_AUTHORIZED_ORG}
-      - GITHUB_OAUTH_AUTHORIZED_TEAMS=${GITHUB_OAUTH_AUTHORIZED_TEAMS}
-      - HEADSCALE_OIDC_CLIENT_ID=${HEADSCALE_OIDC_CLIENT_ID}
-      - HEADSCALE_OIDC_CLIENT_SECRET=${HEADSCALE_OIDC_CLIENT_SECRET}
-      - HEADSCALE_OIDC_CALLBACK_URI=${HEADSCALE_OIDC_CALLBACK_URI}
+    env_file: ./secrets/dex.env
 
 volumes:
   letsencrypt:

@@ -14,15 +14,15 @@ build:
 $(HEADSCALE_DEB): | build
 	curl -fsSL -o $(HEADSCALE_DEB) $(HEADSCALE_URL)
 
+# Secret unlocking
+SECRET_FILES := ../secrets/headscale.env
+include ../secrets/Makefile.inc
+
 # Template in variables in config
-build/config.yaml: config.yaml ../.env | build
-	source ../.env && \
-	export HEADSCALE_FQDN="$${HEADSCALE_FQDN}" && \
-	export HEADSCALE_OIDC_CLIENT_ID="$${HEADSCALE_OIDC_CLIENT_ID}" && \
-	export HEADSCALE_OIDC_CLIENT_SECRET="$${HEADSCALE_OIDC_CLIENT_SECRET}" && \
-	export HEADSCALE_OIDC_ALLOWED_GROUPS="$${HEADSCALE_OIDC_ALLOWED_GROUPS}" && \
-	export DEX_OIDC_ISSUER_URI="$${DEX_OIDC_ISSUER_URI}" && \
-	export TAILNET_BASE_DOMAIN="$${TAILNET_BASE_DOMAIN}" && \
+build/config.yaml: config.yaml ../secrets/headscale.env | build
+	source ../secrets/headscale.env && \
+	export HEADSCALE_FQDN HEADSCALE_OIDC_CLIENT_ID HEADSCALE_OIDC_CLIENT_SECRET \
+		HEADSCALE_OIDC_ALLOWED_GROUPS DEX_OIDC_ISSUER_URI TAILNET_BASE_DOMAIN && \
 	envsubst '\$${HEADSCALE_FQDN}\$${HEADSCALE_OIDC_CLIENT_ID}\$${HEADSCALE_OIDC_CLIENT_SECRET}\$${HEADSCALE_OIDC_ALLOWED_GROUPS}\$${DEX_OIDC_ISSUER_URI}\$${TAILNET_BASE_DOMAIN}' < $< > $@
 
 /etc/headscale:

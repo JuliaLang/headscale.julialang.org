@@ -48,3 +48,9 @@ staticClients:
     redirectURIs:
       - "{{ .Env.HEADSCALE_OIDC_CALLBACK_URI }}"
     name: "{{ .Env.HEADSCALE_OIDC_CLIENT_ID }}"
+
+  - id: "{{ .Env.GRAFANA_OIDC_CLIENT_ID }}"
+    secret: "{{ .Env.GRAFANA_OIDC_CLIENT_SECRET }}"
+    redirectURIs:
+      - "{{ .Env.GRAFANA_OIDC_CALLBACK_URI }}"
+    name: "{{ .Env.GRAFANA_OIDC_CLIENT_ID }}"
