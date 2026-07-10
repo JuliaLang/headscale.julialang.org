@@ -1,0 +1,69 @@
+// vim: ft=jsonc tabstop=2 shiftwidth=2
+{
+  "groups": {
+    "group:admins": ["fredrikekre@", "maleadt@"],
+    "group:julialang-ci": ["fredrikekre@", "maleadt@"],
+    "group:julialang-infra": ["fredrikekre@", "maleadt@"],
+  },
+  "tagOwners": {
+    "tag:pkgservers": [], // Deprecated
+    "tag:servers": [],    // Deprecated
+    "tag:packageserver": ["group:admins"],
+    "tag:storageserver": ["group:admins"],
+    "tag:headscale": [],
+    "tag:julialang-ci": ["group:admins", "group:julialang-ci"],
+    "tag:amdci": ["group:admins"],
+    "tag:gpuci": ["group:admins"],
+  },
+  // Network policies
+  "grants": [
+    // Allow humans and tagged devices to connect to tagged devices
+    {
+      "src": ["autogroup:member", "autogroup:tagged"],
+      "dst": ["autogroup:tagged"],
+      "ip": ["*"]
+    },
+    // Allow humans to connect to their own devices
+    {
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "ip": ["*"]
+    },
+  ],
+  // SSH policies
+  "ssh": [
+    // Allow group:julialang-infra to SSH to tag:packageserver and
+    // tag:storageserver as ubuntu
+    {
+      "action": "check",
+      "src": ["group:julialang-infra"],
+      "dst": ["tag:packageserver", "tag:storageserver"],
+      "users": ["ubuntu"],
+    },
+    // Allow admins to SSH to tag:headscale as ubuntu
+    {
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["tag:headscale"],
+      "users": ["ubuntu"],
+    },
+    // Allow admins to SSH to to all tagged devices
+    {
+      "action": "accept",
+      "src": ["group:admins"],
+      "dst": ["autogroup:tagged"],
+      "users": ["autogroup:nonroot"],
+    },
+  ],
+  // SSH tests
+  "sshTests": [
+    // Anti-lockout rule test
+    {
+      "src": "group:admins",
+      "dst": ["tag:headscale"],
+      "accept": ["ubuntu"],
+      "check": [],
+      "deny": ["root"]
+    }
+  ]
+}
